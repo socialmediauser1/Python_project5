@@ -118,9 +118,9 @@ class AntoniiFramework:
 
         for middleware in reversed(self.middlewares):
             next_layer = middleware_handler
-            def make_layer(mw, nxt):
+            def make_layer(middleware, nxt):
                 def layer():
-                    return mw(environ, nxt)
+                    return middleware(environ, nxt)
                 return layer
             middleware_handler = make_layer(middleware, next_layer)
 
@@ -178,14 +178,14 @@ def authorization_middleware(environ, next_):
     path = environ.get('PATH_INFO', '/')
     if path.startswith('/secure'):
         token = environ.get('HTTP_AUTHORIZATION', '')
-        if token != 'Bearer valid-token':
+        if token != 'valid':
             body = 'Unauthorized'
             return body, '401 Unauthorized', [('Content-Type', 'text/plain; charset=utf-8')]
     return next_()
 
 def footer_middleware(environ, next_):
     result = next_()
-    comment = "<!-- Served by AntoniiFramework -->"
+    comment = "<Antonii Framework>"
     if isinstance(result, tuple):
         body, status, *rest = result + (None,)
         extra_headers = rest[0] if rest and rest[0] is not None else []
@@ -209,12 +209,13 @@ app.add_middleware(logging_middleware)
 app.add_middleware(timing_middleware)
 
 @app.middleware('auth')
-def _auth_mw(environ, next_):
+def auth(environ, next_):
     return authorization_middleware(environ, next_)
 
 @app.middleware('footer')
-def _footer_mw(environ, next_):
+def footer(environ, next_):
     return footer_middleware(environ, next_)
+
 @app.get('/hello/<name>/<age:int>/<city>')
 def hello_person(name, age, city):
     return handle_hello_person(name, age, city)
