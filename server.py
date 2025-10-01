@@ -169,8 +169,8 @@ def timing_middleware(environ, next_):
     start = time.perf_counter()
     result = next_()
     duration_ms = (time.perf_counter() - start) * 1000.0
-    headers = environ.setdefault('extra_response_headers', [])
-    headers.append(('X-Process-Time', f"{duration_ms:.2f}ms"))
+    headers = environ.setdefault('', [])
+    headers.append(('process time', f"{duration_ms:.2f}ms"))
     print(f"[time] {environ.get('PATH_INFO','/')} took {duration_ms:.2f}ms")
     return result
 
